@@ -82,7 +82,7 @@ findData = ->
         alert "Check Error"
         return
       # JSONの作成
-      if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME"
+      if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME" and $(x).attr("class") isnt "selection"
         if type is "DvQuantity"
           valueUnit = $(x).next().val()
           pathUnit  = $(x).next().attr("aqbe:path")
@@ -92,8 +92,19 @@ findData = ->
           condition[path] = parseInt(value)
         else
           condition[path] = value
-  json["condition"] = condition
 
+  selection = {}
+  table = $("#insert table")
+  data = {}
+  for t in table
+    adlName = $(t).attr("aqbe_adl_name")
+    data = $(".selection", t)
+    for s in data
+      if $(s).attr("checked") is "checked"
+        selection[adlName + "." + $(s).attr("aqbe:path")] = 1
+
+  json["condition"] = condition
+  json["selection"] = selection
   $.ajax(
     type: "POST"
     url: "http://wako3.u-aizu.ac.jp:8080/service/find"

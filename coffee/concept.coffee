@@ -32,16 +32,25 @@ conceptBuilder = (json) ->
 class Concept
   constructor: (json) ->
     @name = json.name
-    @path = json.path
+    @path = json.path.replace(/\./g, "___")
+    @type = json.dataType
 
-  inputBuilder: (form, type="", value="") ->
-    switch form
-      when "input"
-        $("<input>").attr("type", type).attr("value", value).attr("name", @path).attr("class", "obj")
-      when "select"
-        $("<select>").attr("name", @path).attr("class", "obj").append("""<option value="">Please Select</option>""")
-      else
-        $("<span>")
+  # <input type="text" value="@value" aqbe:path="@path" />
+  inputBuilder: (placeholder="") ->
+    $("<input>").attr("type", "text").attr("value", "").attr("aqbe:path", @path).attr("aqbe:type", @type).attr("placeholder", placeholder)
+
+  # <input type="text" value="@value" aqbe:path="@path" id="fieldDate" />
+  calenderBuilder: () ->
+    @inputBuilder().attr("id", "fieldDate")
+
+  # <select aqbe:path="@path"><option value="">Please Select</option></select>
+  selectBuilder: (path=@path, type=@type, require=false) ->
+    selecter = $("<select>").attr("aqbe:path", path).attr("aqbe:type", type)
+    if require
+      selecter
+    else
+      selecter.append("""<option value="">Please Select</option>""")
+
 
   getHtml: ->
     $("<tr>").append($("<td>").text(@name))
@@ -51,25 +60,25 @@ class DvQuantity extends Concept
     super json
     @path = @path + "/magnitude"
     @unitPath = @path.replace("/magnitude", "/units")
-    @min  = json.min
-    @max  = json.max
+    @min  = if json.min[0]? then json.min else [-999999]
+    @max  = if json.max? then json.max else [999999]
     @unit = json.unit
   getHtml: ->
-    @input = @inputBuilder("input", "number", @min[0]).attr("min", @min[0]).attr("max", @max[0])
-    @unitSelecter = $("<select>").attr("class", "obj").attr("name", @unitPath)
+    input = @inputBuilder("0.0").attr("aqbe:min", @min[0]).attr("aqbe:max", @max[0])
+    unitSelecter = @selectBuilder(path=@unitPath, type="DvQuantityUnit", require=true)
     for k, v in @unit
-      @unitSelecter.append("<option value=\"#{k}\">#{k}</option>")
-    @unitSelecter.change =>
-      idx = @unitSelecter.val()
-      $(@input).attr("min", @min[idx]).attr("max", @max[idx])
-    super.append($("<td>").append(@input).append(" ").append(@unitSelecter))
+      unitSelecter.append("<option value=\"#{v}\">#{k}</option>")
+    unitSelecter.change =>
+      index = unitSelecter.val()
+      $(input).attr("aqbe:min", @min[index]).attr("aqbe:max", @max[index])
+    super.append($("<td>").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">"))
 
 class DvCodedText extends Concept
   constructor: (json) ->
     super json
     @codeList = json.codeList
   getHtml: ->
-    select = @inputBuilder("select")
+    select = @selectBuilder()
     for code in @codeList
       select.append("<option value=\"#{code}\">#{code}</option>")
     super.append($("<td>").append(select))
@@ -78,28 +87,28 @@ class DvBoolean extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("select").append("""<option value="true">true</option>""").append("""<option value="false">false</option>""")))
+    super.append($("<td>").append(@selectBuilder().append("""<option value="true">true</option>""").append("""<option value="false">false</option>""")))
 
 class DvText extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("input", "text").attr("placeholder", "Free Text")))
+    super.append($("<td>").append(@inputBuilder("Freetext")))
 
 class DvCount extends Concept
   constructor: (json) ->
     super json
-    @min  = json.min
-    @max  = json.max
+    @min  = if json.min? then json.min else -999999
+    @max  = if json.max? then json.max else 999999
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("input", "number", @min).attr("min", @min).attr("max", @max)))
+    super.append($("<td>").append(@inputBuilder("0").attr("aqbe:min", @min).attr("aqbe:max", @max)).append("<span class=\"error\">"))
 
 class DvOrdinal extends Concept
   constructor: (json) ->
     super json
     @codeList = json.codeList
   getHtml: ->
-    select = @inputBuilder("select")
+    select = @selectBuilder()
     for c in @codeList
       select.append("<option value=\"#{c._1}\">#{c._2}</option>")
     super.append($("<td>").append(select))
@@ -109,7 +118,7 @@ class DvMultiMedia extends Concept
     super json
     @codeList = json.codeList
   getHtml: ->
-    select = @inputBuilder("select")
+    select = @selectBuilder()
     for c in @codeList
       select.append("<option value=\"#{c}\">#{c}</option>")
     super.append($("<td>").append(select))
@@ -118,16 +127,14 @@ class DvDateTime extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    date = new Date()
-    today = date.getFullYear()  + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
-    super.append($("<td>").append(@inputBuilder("input", "text", today).attr("min", "1990-01-01-00:00:00").attr("max", today)))
+    super.append($("<td>").append(@calenderBuilder("Date Time")).append("""<input type="hidden" value="" aqbe:type="DvDateTimeInteger" aqbe:path=""" + @path + """ />"""))
 
 class DvInterval extends Concept
   constructor: (json) ->
     super json
     @interval = json.interval
   getHtml: ->
-    newTable = $("<table>").attr("class", "adl2")
+    newTable = $("<table>").attr("class", "adl")
     for c in @interval
       cc = conceptBuilder(c)
       newTable.append(cc.getHtml())
@@ -141,8 +148,13 @@ class DvProportion extends Concept
     @minDen = json.minDen
     @maxDen = json.maxDen
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("input", "number", @minNum).attr("min", @minNum).attr("max", @maxNum)).append(" : ").
-                 append("input", "number", @minDen).attr("min", @minDen).attr("max", @maxDen))
+    @min = @minNum
+    @max = @maxNum
+    num = @inputBuilder("0")
+    @min = @minDen
+    @max = @maxNum
+    den = @inputBuilder("0")
+    super.append($("<td>").append(num.append(" : ").den))
 
 class DvUri extends Concept
   constructor: (json) ->

@@ -40,23 +40,37 @@ Concept = (function() {
 
   function Concept(json) {
     this.name = json.name;
-    this.path = json.path;
+    this.path = json.path.replace(/\./g, "___");
+    this.type = json.dataType;
   }
 
-  Concept.prototype.inputBuilder = function(form, type, value) {
+  Concept.prototype.inputBuilder = function(placeholder) {
+    if (placeholder == null) {
+      placeholder = "";
+    }
+    return $("<input>").attr("type", "text").attr("value", "").attr("aqbe:path", this.path).attr("aqbe:type", this.type).attr("placeholder", placeholder);
+  };
+
+  Concept.prototype.calenderBuilder = function() {
+    return this.inputBuilder().attr("id", "fieldDate");
+  };
+
+  Concept.prototype.selectBuilder = function(path, type, require) {
+    var selecter;
+    if (path == null) {
+      path = this.path;
+    }
     if (type == null) {
-      type = "";
+      type = this.type;
     }
-    if (value == null) {
-      value = "";
+    if (require == null) {
+      require = false;
     }
-    switch (form) {
-      case "input":
-        return $("<input>").attr("type", type).attr("value", value).attr("name", this.path).attr("class", "obj");
-      case "select":
-        return $("<select>").attr("name", this.path).attr("class", "obj").append("<option value=\"\">Please Select</option>");
-      default:
-        return $("<span>");
+    selecter = $("<select>").attr("aqbe:path", path).attr("aqbe:type", type);
+    if (require) {
+      return selecter;
+    } else {
+      return selecter.append("<option value=\"\">Please Select</option>");
     }
   };
 
@@ -76,27 +90,27 @@ DvQuantity = (function(_super) {
     DvQuantity.__super__.constructor.call(this, json);
     this.path = this.path + "/magnitude";
     this.unitPath = this.path.replace("/magnitude", "/units");
-    this.min = json.min;
-    this.max = json.max;
+    this.min = json.min[0] != null ? json.min : [-999999];
+    this.max = json.max != null ? json.max : [999999];
     this.unit = json.unit;
   }
 
   DvQuantity.prototype.getHtml = function() {
-    var k, v, _i, _len, _ref,
+    var input, k, path, require, type, unitSelecter, v, _i, _len, _ref,
       _this = this;
-    this.input = this.inputBuilder("input", "number", this.min[0]).attr("min", this.min[0]).attr("max", this.max[0]);
-    this.unitSelecter = $("<select>").attr("class", "obj").attr("name", this.unitPath);
+    input = this.inputBuilder("0.0").attr("aqbe:min", this.min[0]).attr("aqbe:max", this.max[0]);
+    unitSelecter = this.selectBuilder(path = this.unitPath, type = "DvQuantityUnit", require = true);
     _ref = this.unit;
     for (v = _i = 0, _len = _ref.length; _i < _len; v = ++_i) {
       k = _ref[v];
-      this.unitSelecter.append("<option value=\"" + k + "\">" + k + "</option>");
+      unitSelecter.append("<option value=\"" + v + "\">" + k + "</option>");
     }
-    this.unitSelecter.change(function() {
-      var idx;
-      idx = _this.unitSelecter.val();
-      return $(_this.input).attr("min", _this.min[idx]).attr("max", _this.max[idx]);
+    unitSelecter.change(function() {
+      var index;
+      index = unitSelecter.val();
+      return $(input).attr("aqbe:min", _this.min[index]).attr("aqbe:max", _this.max[index]);
     });
-    return DvQuantity.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.input).append(" ").append(this.unitSelecter));
+    return DvQuantity.__super__.getHtml.apply(this, arguments).append($("<td>").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">"));
   };
 
   return DvQuantity;
@@ -114,7 +128,7 @@ DvCodedText = (function(_super) {
 
   DvCodedText.prototype.getHtml = function() {
     var code, select, _i, _len, _ref;
-    select = this.inputBuilder("select");
+    select = this.selectBuilder();
     _ref = this.codeList;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       code = _ref[_i];
@@ -136,7 +150,7 @@ DvBoolean = (function(_super) {
   }
 
   DvBoolean.prototype.getHtml = function() {
-    return DvBoolean.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("select").append("<option value=\"true\">true</option>").append("<option value=\"false\">false</option>")));
+    return DvBoolean.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.selectBuilder().append("<option value=\"true\">true</option>").append("<option value=\"false\">false</option>")));
   };
 
   return DvBoolean;
@@ -152,7 +166,7 @@ DvText = (function(_super) {
   }
 
   DvText.prototype.getHtml = function() {
-    return DvText.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("input", "text").attr("placeholder", "Free Text")));
+    return DvText.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("Freetext")));
   };
 
   return DvText;
@@ -165,12 +179,12 @@ DvCount = (function(_super) {
 
   function DvCount(json) {
     DvCount.__super__.constructor.call(this, json);
-    this.min = json.min;
-    this.max = json.max;
+    this.min = json.min != null ? json.min : -999999;
+    this.max = json.max != null ? json.max : 999999;
   }
 
   DvCount.prototype.getHtml = function() {
-    return DvCount.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("input", "number", this.min).attr("min", this.min).attr("max", this.max)));
+    return DvCount.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("0").attr("aqbe:min", this.min).attr("aqbe:max", this.max)).append("<span class=\"error\">"));
   };
 
   return DvCount;
@@ -188,7 +202,7 @@ DvOrdinal = (function(_super) {
 
   DvOrdinal.prototype.getHtml = function() {
     var c, select, _i, _len, _ref;
-    select = this.inputBuilder("select");
+    select = this.selectBuilder();
     _ref = this.codeList;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       c = _ref[_i];
@@ -212,7 +226,7 @@ DvMultiMedia = (function(_super) {
 
   DvMultiMedia.prototype.getHtml = function() {
     var c, select, _i, _len, _ref;
-    select = this.inputBuilder("select");
+    select = this.selectBuilder();
     _ref = this.codeList;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       c = _ref[_i];
@@ -234,10 +248,7 @@ DvDateTime = (function(_super) {
   }
 
   DvDateTime.prototype.getHtml = function() {
-    var date, today;
-    date = new Date();
-    today = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-    return DvDateTime.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("input", "text", today).attr("min", "1990-01-01-00:00:00").attr("max", today)));
+    return DvDateTime.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.calenderBuilder("Date Time")).append("<input type=\"hidden\" value=\"\" aqbe:type=\"DvDateTimeInteger\" aqbe:path=" + this.path + " />"));
   };
 
   return DvDateTime;
@@ -255,7 +266,7 @@ DvInterval = (function(_super) {
 
   DvInterval.prototype.getHtml = function() {
     var c, cc, newTable, _i, _len, _ref;
-    newTable = $("<table>").attr("class", "adl2");
+    newTable = $("<table>").attr("class", "adl");
     _ref = this.interval;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       c = _ref[_i];
@@ -282,7 +293,14 @@ DvProportion = (function(_super) {
   }
 
   DvProportion.prototype.getHtml = function() {
-    return DvProportion.__super__.getHtml.apply(this, arguments).append($("<td>").append(this.inputBuilder("input", "number", this.minNum).attr("min", this.minNum).attr("max", this.maxNum)).append(" : ").append("input", "number", this.minDen).attr("min", this.minDen).attr("max", this.maxDen));
+    var den, num;
+    this.min = this.minNum;
+    this.max = this.maxNum;
+    num = this.inputBuilder("0");
+    this.min = this.minDen;
+    this.max = this.maxNum;
+    den = this.inputBuilder("0");
+    return DvProportion.__super__.getHtml.apply(this, arguments).append($("<td>").append(num.append(" : ").den));
   };
 
   return DvProportion;

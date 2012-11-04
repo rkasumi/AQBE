@@ -71,10 +71,6 @@ findData = ->
       value = $(x).val()
       path  = adlName + "." + $(x).attr("aqbe:path")
       type  = $(x).attr("aqbe:type")
-      # 必須の入力を確認
-      if type is "Require" and value is ""
-        alert "Please Input Patient name"
-        return
       # 不正な入力の確認
       error = false
       for o in $(".error") then if $(o).text() isnt "" then error = true

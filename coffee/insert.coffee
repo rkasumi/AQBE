@@ -91,7 +91,7 @@ addData = ->
           temp[path] = parseInt(value)
         else
           temp[path] = value
-    json[adlName] = temp
+    json[adlName] = temp if adlName?
 
   $.ajax(
     type: "POST"

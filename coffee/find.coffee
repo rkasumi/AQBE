@@ -89,7 +89,8 @@ findData = ->
         else
           condition[path] = value
 
-  selection = {}
+  # selection
+  selection = {"_id":0}
   table = $("#insert table")
   data = {}
   for t in table

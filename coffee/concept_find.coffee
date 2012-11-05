@@ -102,7 +102,6 @@ class DvText extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    console.log "a"
     super.append($("<td>").append(@conditionBuilder()).append(" ").append(@inputBuilder("FreeText")))
 
 class DvCount extends Concept

@@ -65,12 +65,14 @@ findData = ->
   for t in table
     adlName = $(t).attr("aqbe_adl_name")
     data = $("input, select", t)
+    unless adlName? then continue
     for x in data
       temp = {}
       # データの読み込み
       value = $(x).val()
       path  = adlName + "." + $(x).attr("aqbe:path")
       type  = $(x).attr("aqbe:type")
+      if $(x).attr("aqbe:path") is undefined then continue
       # 不正な入力の確認
       error = false
       for o in $(".error") then if $(o).text() isnt "" then error = true
@@ -81,7 +83,7 @@ findData = ->
       if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME" and $(x).attr("class") isnt "selection"
         if type is "DvQuantity"
           valueUnit = $(x).next().val()
-          pathUnit  = $(x).next().attr("aqbe:path")
+          pathUnit  = adlName + "." + $(x).next().attr("aqbe:path")
           condition[path] = parseFloat(value)
           condition[pathUnit] = valueUnit
         else if type is "DV_COUNT" or type is "DvDateTimeInteger" or type is "DvProportion"

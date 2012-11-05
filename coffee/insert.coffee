@@ -2,6 +2,14 @@ $(document).ready ->
   conceptSelector()
   $("#add input").click ->
     addData()
+  $("#context").AnyTime_picker({
+    format: "%Y/%m/%d %H:%i:%s"
+    earliest: "1980/01/01 01:00:00"
+    latest: new Date()
+  })
+  $("#context").change( ->
+    validateDvDateTime(@)
+  )
 
 ###
   * #concept要素にADL名一覧を展開

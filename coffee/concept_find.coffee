@@ -51,6 +51,15 @@ class Concept
     else
       selecter.append("""<option value="">Please Select</option>""")
 
+  conditionBuilder: (type="text") ->
+    selecter = $("<select>").attr("class", "condition")
+    selecter.append("""<option value="0">=</option>""")
+    selecter.append("""<option value="1">!=</option>""")
+    selecter.append("""<option value="2">&gt;</option>""") if type is "number" # >
+    selecter.append("""<option value="3">&lt;</option>""") if type is "number" # <
+    selecter.append("""<option value="4">&gt;=</option>""") if type is "number" # >=
+    selecter.append("""<option value="5">&lt;=</option>""") if type is "number" # <=
+    selecter
 
   getHtml: ->
     $("<tr>").append($("<td>").append($("<input>").attr("type","checkbox").attr("aqbe:path",@path).attr("class","selection")).append(@name))
@@ -71,7 +80,7 @@ class DvQuantity extends Concept
     unitSelecter.change =>
       index = unitSelecter.val()
       $(input).attr("aqbe:min", @min[index]).attr("aqbe:max", @max[index])
-    super.append($("<td>").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">"))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">"))
 
 class DvCodedText extends Concept
   constructor: (json) ->
@@ -93,7 +102,8 @@ class DvText extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("Freetext")))
+    console.log "a"
+    super.append($("<td>").append(@conditionBuilder()).append(" ").append(@inputBuilder("FreeText")))
 
 class DvCount extends Concept
   constructor: (json) ->
@@ -101,7 +111,7 @@ class DvCount extends Concept
     @min  = if json.min? then json.min else -999999
     @max  = if json.max? then json.max else 999999
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("0").attr("aqbe:min", @min).attr("aqbe:max", @max)).append("<span class=\"error\">"))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@inputBuilder("0").attr("aqbe:min", @min).attr("aqbe:max", @max)).append("<span class=\"error\">"))
 
 class DvOrdinal extends Concept
   constructor: (json) ->
@@ -127,7 +137,7 @@ class DvDateTime extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@calenderBuilder("Date Time")).append("""<input type="hidden" value="" aqbe:type="DvDateTimeInteger" aqbe:path=""" + @path + """ />"""))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@calenderBuilder("Date Time")).append("""<input type="hidden" value="" aqbe:type="DvDateTimeInteger" aqbe:path=""" + @path + """ />"""))
 
 class DvInterval extends Concept
   constructor: (json) ->
@@ -154,13 +164,13 @@ class DvProportion extends Concept
     @min = @minDen
     @max = @maxNum
     den = @inputBuilder("0")
-    super.append($("<td>").append(num.append(" : ").den))
+    super.append($("<td>").append(@conceptBuilder("number")).append(" ").append(num.append(" : ").den))
 
 class DvUri extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@inputBuilder("input", "url").attr("placeholder", "URL")))
+    super.append($("<td>").append(@conceptBuilder()).append(" ").append(@inputBuilder("input", "url").attr("placeholder", "URL")))
 
 class DvAny extends Concept
   constructor: (json) ->

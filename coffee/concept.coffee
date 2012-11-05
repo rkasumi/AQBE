@@ -61,7 +61,7 @@ class DvQuantity extends Concept
     @path = @path + "/magnitude"
     @unitPath = @path.replace("/magnitude", "/units")
     @min  = if json.min[0]? then json.min else [-999999]
-    @max  = if json.max? then json.max else [999999]
+    @max  = if json.max[0]? then json.max else [999999]
     @unit = json.unit
   getHtml: ->
     input = @inputBuilder("0.0").attr("aqbe:min", @min[0]).attr("aqbe:max", @max[0])

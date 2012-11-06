@@ -51,6 +51,7 @@ class Concept
     else
       selecter.append("""<option value="">Please Select</option>""")
 
+  # = != > < <= >= のセレクトボックス
   conditionBuilder: (type="text") ->
     selecter = $("<select>").attr("class", "condition")
     selecter.append("""<option value="0">=</option>""")
@@ -62,6 +63,7 @@ class Concept
     selecter
 
   getHtml: ->
+    $("#pathList").append("#{@path},#{@name}\n")
     $("<tr>").append($("<td>").append($("<input>").attr("type","checkbox").attr("aqbe:path",@path).attr("class","selection")).append(@name))
 
 class DvQuantity extends Concept

@@ -2,6 +2,7 @@ $(document).ready ->
   conceptSelector()
   $("#add input").click ->
     findData()
+  $("#pathList").append("/name/value,Patient Name\n/composer/value,Composer\n/context/start_time,Context")
 
 ###
   * #concept要素にADL名一覧を展開
@@ -45,7 +46,7 @@ parseConcept = (json) ->
   # ADL Listの展開
   for name, list of adlList
     # 単ADL名の表示とテーブルの表示
-    $("#insert").append("<h3>#{name}</h3>").append($("<table>").attr("class", "adl").attr("aqbe_adl_name", name))
+    $("#find").append("<h3>#{name}</h3>").append($("<table>").attr("class", "adl").attr("aqbe_adl_name", name))
     # ADLList の展開
     for k,v of list
       # ADLList名の表示
@@ -60,7 +61,7 @@ parseConcept = (json) ->
 findData = ->
   json = {}
   condition = []
-  table = $("#insert table")
+  table = $("#find table")
   data = {}
   count = 0
   for t in table
@@ -104,7 +105,7 @@ findData = ->
 
   # selection
   selection = {"_id":0}
-  table = $("#insert table")
+  table = $("#find table")
   data = {}
   for t in table
     adlName = $(t).attr("aqbe_adl_name")
@@ -120,8 +121,20 @@ findData = ->
     url: "http://wako3.u-aizu.ac.jp:8080/service/find"
     contentType: "text/json"
     data: JSON.stringify(json)
-    success: (result) ->
-      console.log result
+    success: (response) ->
+      for result in response.result
+        for key, obj of result
+          console.log key
+          for path, value of obj
+            console.log toName(path) + " = " + value
     error: ->
       alert "Bad Request"
   )
+
+toName = (path) ->
+  text = $("#pathList").text().split("\n")
+  pathList = {}
+  for attr in text
+    [a,b] = attr.split(",")
+    pathList[a] = b
+  return pathList[path]

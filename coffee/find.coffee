@@ -3,6 +3,11 @@ $(document).ready ->
   $("#add input").click ->
     findData()
   $("#pathList").append("/name/value,Patient Name\n/composer/value,Composer\n/context/start_time,Context\n")
+  $("#context").AnyTime_picker({
+    format: "%Y/%m/%d %H:%i:%s"
+    earliest: "1980/01/01 01:00:00"
+    latest: new Date()
+  })
 
 ###
   * #concept要素にADL名一覧を展開
@@ -84,21 +89,50 @@ findData = ->
       # JSONの作成
       if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME" and $(x).attr("class") isnt "selection" and $(x).attr("class") isnt "condition"
         # condition = != > < <= >= の取得
-        con = if type is "DvDateTimeInteger" then $(x).prev().prev(".condition").val() else $(x).prev(".condition").val()
-        con = if con? then con else 0
+        con = parseInt(if type is "DvDateTimeInteger" then $(x).prev().prev(".condition").val() else $(x).prev(".condition").val())
+        conV = undefined
+        if con is 1 then conV = "$ne"
+        else if con is 2 then conV = "$gt"
+        else if con is 3 then conV = "$lt"
+        else if con is 4 then conV = "$gte"
+        else if con is 5 then conV = "$lte"
         # JSONの作成 typeによって一部取得する値を変更する
+        obj = {}
         if type is "DvQuantity"
           valueUnit = $(x).next().val()
           pathUnit  = adlName + "." + $(x).next().attr("aqbe:path")
-          o1 = {}; o1[path] = parseFloat(value)
-          o2 = {}; o2[pathUnit] = valueUnit
-          condition[count++] = {"$and": [o1, o2]}
+          if conV?
+            if con is 1 # notの時はvalueのみチェック
+              o1 = {}; o1[conV] = parseFloat(value)
+              o1_2 = {}; o1_2[path] = o1
+              condition[count] = o1_2
+            else # それ以外(><>=<=)の時はvalueのみconV付加で単位はequal
+              o1 = {}; o1[conV] = parseFloat(value)
+              o1_2 = {}; o1_2[path] = o1
+              o2 = {}; o2[pathUnit] = valueUnit
+              condition[count] = {"$and": [o1_2, o2]}
+          else # equalの場合
+            o1 = {}; o1[path] = parseFloat(value)
+            o2 = {}; o2[pathUnit] = valueUnit
+            condition[count] = {"$and": [o1, o2]}
         else if type is "DV_COUNT" or type is "DvDateTimeInteger" or type is "DvProportion"
-          obj = {}; obj[path] = parseInt(value)
-          condition[count++] = obj
+          if conV?
+            temp = {}; temp[conV] = parseInt(value)
+            obj[path] = temp
+            condition[count] = obj
+          else
+            obj[path] = parseInt(value)
+            condition[count] = obj
         else
-          obj = {}; obj[path] = value
-          condition[count++] = obj
+          if conV?
+            temp = {}; temp[conV] = value
+            obj[path] = temp
+            condition[count] = obj
+          else
+            obj[path] = value
+            condition[count] = obj
+        #count増加
+        count++
 
   # selection
   selection = {"_id":0}
@@ -119,6 +153,7 @@ findData = ->
     contentType: "text/json"
     data: JSON.stringify(json)
     success: (response) ->
+      # 成功したら結果をテーブルに表示
       for result in response.result
         table = $("<table>").attr("class","adl")
         for key, obj of result
@@ -127,18 +162,21 @@ findData = ->
           for path, value of obj
             table.append($("<tr>").append($("<td>").append(toName(path))).append($("<td>").append(value)))
         $("#result").append(table).append($("<br>"))
+
+      # 検索フォームを隠し、結果を表示
       $("#find").hide()
       $("#add").hide()
       $("#result").show("fast")
 
+      # 戻るボタンを表示
       $("#back").show()
-      $("#back input").unbind()
+      $("#back input").unbind() # 古いイベントを削除
       $("#back input").click ->
         $("#result").hide()
-        $("#result").empty()
         $("#find").show("fast")
         $("#add").show()
-        $("#back").hide()
+        $("#back").hide() # ボタンを非表示に
+        $("#result").empty() # 結果を削除
 
     error: ->
       alert "Bad Request"

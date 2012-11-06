@@ -2,7 +2,7 @@ $(document).ready ->
   conceptSelector()
   $("#add input").click ->
     findData()
-  $("#pathList").append("/name/value,Patient Name\n/composer/value,Composer\n/context/start_time,Context")
+  $("#pathList").append("/name/value,Patient Name\n/composer/value,Composer\n/context/start_time,Context\n")
 
 ###
   * #concept要素にADL名一覧を展開
@@ -92,16 +92,13 @@ findData = ->
           pathUnit  = adlName + "." + $(x).next().attr("aqbe:path")
           o1 = {}; o1[path] = parseFloat(value)
           o2 = {}; o2[pathUnit] = valueUnit
-          condition[count] = {"$and": [o1, o2]}
-          count += 1
+          condition[count++] = {"$and": [o1, o2]}
         else if type is "DV_COUNT" or type is "DvDateTimeInteger" or type is "DvProportion"
           obj = {}; obj[path] = parseInt(value)
-          condition[count] = obj
-          count += 1
+          condition[count++] = obj
         else
           obj = {}; obj[path] = value
-          condition[count] = obj
-          count += 1
+          condition[count++] = obj
 
   # selection
   selection = {"_id":0}
@@ -114,7 +111,7 @@ findData = ->
       if $(s).attr("checked") is "checked"
         selection[adlName + "." + $(s).attr("aqbe:path")] = 1
 
-  json["condition"] = {"$and": condition}
+  json["condition"] = if condition[0]? then {"$and": condition} else {}
   json["selection"] = selection
   $.ajax(
     type: "POST"
@@ -123,10 +120,26 @@ findData = ->
     data: JSON.stringify(json)
     success: (response) ->
       for result in response.result
+        table = $("<table>").attr("class","adl")
         for key, obj of result
-          console.log key
+          if key isnt "ehr"
+            table.append($("<tr>").append($("<th>").attr("colspan",2).append(key)))
           for path, value of obj
-            console.log toName(path) + " = " + value
+            table.append($("<tr>").append($("<td>").append(toName(path))).append($("<td>").append(value)))
+        $("#result").append(table).append($("<br>"))
+      $("#find").hide()
+      $("#add").hide()
+      $("#result").show("fast")
+
+      $("#back").show()
+      $("#back input").unbind()
+      $("#back input").click ->
+        $("#result").hide()
+        $("#result").empty()
+        $("#find").show("fast")
+        $("#add").show()
+        $("#back").hide()
+
     error: ->
       alert "Bad Request"
   )

@@ -15,6 +15,7 @@
 </head>
 <body>
   <input type="button" value="new query" onclick="document.location = document.location" />
+  <span style="display:none" id="back"><input type="button" value="back" /></span>
   <select id="concept">
     <option value="" selected>Please Select</option>
   </select>
@@ -37,8 +38,8 @@
       </table>
     </div>
     <div id="add"><input type="button" value="find data" /></div>
-    <div id="result"></div>
-    <textarea id="pathList"></textarea>
+    <div id="result" style="display:none"></div>
+    <div style="display:none"><textarea id="pathList"></textarea></div>
   </body>
 </html>
 

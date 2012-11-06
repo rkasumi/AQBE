@@ -59,9 +59,10 @@ parseConcept = (json) ->
 
 findData = ->
   json = {}
-  condition = {}
+  condition = []
   table = $("#insert table")
   data = {}
+  count = 0
   for t in table
     adlName = $(t).attr("aqbe_adl_name")
     data = $("input, select", t)
@@ -80,16 +81,26 @@ findData = ->
         alert "Check Error"
         return
       # JSONの作成
-      if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME" and $(x).attr("class") isnt "selection"
+      if value isnt "" and type isnt "DvQuantityUnit" and type isnt "DV_DATE_TIME" and $(x).attr("class") isnt "selection" and $(x).attr("class") isnt "condition"
+        # condition = != > < <= >= の取得
+        con = if type is "DvDateTimeInteger" then $(x).prev().prev(".condition").val() else $(x).prev(".condition").val()
+        con = if con? then con else 0
+        # JSONの作成 typeによって一部取得する値を変更する
         if type is "DvQuantity"
           valueUnit = $(x).next().val()
           pathUnit  = adlName + "." + $(x).next().attr("aqbe:path")
-          condition[path] = parseFloat(value)
-          condition[pathUnit] = valueUnit
+          o1 = {}; o1[path] = parseFloat(value)
+          o2 = {}; o2[pathUnit] = valueUnit
+          condition[count] = {"$and": [o1, o2]}
+          count += 1
         else if type is "DV_COUNT" or type is "DvDateTimeInteger" or type is "DvProportion"
-          condition[path] = parseInt(value)
+          obj = {}; obj[path] = parseInt(value)
+          condition[count] = obj
+          count += 1
         else
-          condition[path] = value
+          obj = {}; obj[path] = value
+          condition[count] = obj
+          count += 1
 
   # selection
   selection = {"_id":0}
@@ -102,7 +113,7 @@ findData = ->
       if $(s).attr("checked") is "checked"
         selection[adlName + "." + $(s).attr("aqbe:path")] = 1
 
-  json["condition"] = condition
+  json["condition"] = {"$and": condition}
   json["selection"] = selection
   $.ajax(
     type: "POST"

@@ -62,9 +62,15 @@ class Concept
     selecter.append("""<option value="5">&lt;=</option>""") if type is "number" # <=
     selecter
 
+  submitBuilder: () ->
+    submitter = $("<input>").attr("type", "button").attr("class", "submit").val("add")
+    submitter.click ->
+      submit(submitter)
+    submitter
+
   getHtml: ->
     $("#pathList").append("#{@path},#{@name}\n")
-    $("<tr>").append($("<td>").append($("<input>").attr("type","checkbox").attr("aqbe:path",@path).attr("class","selection")).append(@name))
+    $("<tr>").append($("<td>").append($("<input>").attr("type","checkbox").attr("aqbe:path",@path).attr("class","selection")).append($("<span>").append(@name)))
 
 class DvQuantity extends Concept
   constructor: (json) ->
@@ -82,7 +88,7 @@ class DvQuantity extends Concept
     unitSelecter.change =>
       index = unitSelecter.val()
       $(input).attr("aqbe:min", @min[index]).attr("aqbe:max", @max[index])
-    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">"))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(input).append(" ").append(unitSelecter).append("<span class=\"error\">").append(@submitBuilder()))
 
 class DvCodedText extends Concept
   constructor: (json) ->
@@ -92,19 +98,19 @@ class DvCodedText extends Concept
     select = @selectBuilder()
     for code in @codeList
       select.append("<option value=\"#{code}\">#{code}</option>")
-    super.append($("<td>").append(select))
+    super.append($("<td>").append(select).append(@submitBuilder()))
 
 class DvBoolean extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@selectBuilder().append("""<option value="true">true</option>""").append("""<option value="false">false</option>""")))
+    super.append($("<td>").append(@selectBuilder().append("""<option value="true">true</option>""").append("""<option value="false">false</option>""")).append(@submitBuilder()))
 
 class DvText extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@conditionBuilder()).append(" ").append(@inputBuilder("FreeText")))
+    super.append($("<td>").append(@conditionBuilder()).append(" ").append(@inputBuilder("FreeText")).append(@submitBuilder()))
 
 class DvCount extends Concept
   constructor: (json) ->
@@ -112,7 +118,7 @@ class DvCount extends Concept
     @min  = if json.min? then json.min else -999999
     @max  = if json.max? then json.max else 999999
   getHtml: ->
-    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@inputBuilder("0").attr("aqbe:min", @min).attr("aqbe:max", @max)).append("<span class=\"error\">"))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@inputBuilder("0").attr("aqbe:min", @min).attr("aqbe:max", @max)).append("<span class=\"error\">").append(@submitBuilder()))
 
 class DvOrdinal extends Concept
   constructor: (json) ->
@@ -122,7 +128,7 @@ class DvOrdinal extends Concept
     select = @selectBuilder()
     for c in @codeList
       select.append("<option value=\"#{c._1}\">#{c._2}</option>")
-    super.append($("<td>").append(select))
+    super.append($("<td>").append(select).append(@submitBuilder()))
 
 class DvMultiMedia extends Concept
   constructor: (json) ->
@@ -132,13 +138,13 @@ class DvMultiMedia extends Concept
     select = @selectBuilder()
     for c in @codeList
       select.append("<option value=\"#{c}\">#{c}</option>")
-    super.append($("<td>").append(select))
+    super.append($("<td>").append(select).append(@submitBuilder()))
 
 class DvDateTime extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@calenderBuilder("Date Time")).append("""<input type="hidden" value="" aqbe:type="DvDateTimeInteger" aqbe:path=""" + @path + """ />"""))
+    super.append($("<td>").append(@conditionBuilder("number")).append(" ").append(@calenderBuilder("Date Time")).append("""<input type="hidden" value="" aqbe:type="DvDateTimeInteger" aqbe:path=""" + @path + """ />""").append(@submitBuilder()))
 
 class DvInterval extends Concept
   constructor: (json) ->
@@ -165,13 +171,13 @@ class DvProportion extends Concept
     @min = @minDen
     @max = @maxNum
     den = @inputBuilder("0")
-    super.append($("<td>").append(@conceptBuilder("number")).append(" ").append(num.append(" : ").den))
+    super.append($("<td>").append(@conceptBuilder("number")).append(" ").append(num).append(" : ").appedn(den).append(@submitBuilder()))
 
 class DvUri extends Concept
   constructor: (json) ->
     super json
   getHtml: ->
-    super.append($("<td>").append(@conceptBuilder()).append(" ").append(@inputBuilder("input", "url").attr("placeholder", "URL")))
+    super.append($("<td>").append(@conceptBuilder()).append(" ").append(@inputBuilder("input", "url").attr("placeholder", "URL")).append(@submitBuilder()))
 
 class DvAny extends Concept
   constructor: (json) ->
@@ -201,3 +207,74 @@ class DvMultipleElements extends Concept
       newTable.append(cc.getHtml())
     super.append($("<td>").append(newTable))
 
+
+submit = (obj) ->
+  parent = $(obj).parent("td")                # 親要素の取得
+  # validation
+  unless parent.find("span").text() is ""
+    alert "Error"
+    return
+
+  input = parent.find("input, select")        # 各種inputの取得
+  name = parent.prev("td").find("span").text() # nameの取得
+  empty = ""
+  for i in input
+    unless $(i).attr("class") is "submit" or $(i).attr("class") is "remover"
+      if $(i).attr("class") is "condition"
+        condition = $(i).val()
+      else
+        path = $(i).attr("aqbe:path")
+        type = $(i).attr("aqbe:type")
+        if type is "DvQuantityUnit"
+          unit = $(i).val()
+          unitStr = $(i).children(":selected").text()
+        else if type is "DV_DATE_TIME"
+          calStr = $(i).val()
+        else
+          value = $(i).val()
+
+  # empty value
+  if value is ""
+    alert "empty!"
+    return
+
+  # condition to conditonString
+  conStr = con2str(condition)
+
+  # make string
+  str = "#{name},#{path},#{condition},#{conStr},#{value},#{unit},#{unitStr},#{calStr}"
+
+  # display
+  remover = $("<input>").attr("type","button").attr("class", "remover").val("x")
+  remover.click ->
+    remover.parent("p").remove()
+    text = $("#stack").text()
+    $("#stack").empty()
+    flag = true
+    for x in text.split("\n")
+      unless (x is str and flag) or x is ""
+        $("#stack").append("#{x}\n")
+
+  $(obj).parent("td").append($("<p>").text("#{conStr} #{(if calStr? then calStr else value)} #{(if unitStr? then unitStr else empty)}").append(remover))
+  # stack data
+  # name, path, condition, condition string, value, unit, unit string, calendar string \n
+  $("#stack").append("#{str}\n")
+
+
+con2str = (condition) ->
+  switch parseInt(condition)
+    when 0
+      conStr = "="
+    when 1
+      conStr = "!="
+    when 2
+      conStr = ">"
+    when 3
+      conStr = "<"
+    when 4
+      conStr = ">="
+    when 5
+      conStr = "<="
+    else
+      conStr = "="
+  conStr

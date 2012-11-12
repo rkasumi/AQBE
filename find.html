@@ -22,32 +22,32 @@
     <option value="" selected>Please Select</option>
   </select>
   <div id="find">
-    <h3>Patient Data</h3>
+    <h3><input class="selection" type="checkbox" aqbe:path="ehr" />Patient Data</h3>
     <table class="adl" aqbe_adl_name="ehr">
       <tr>
-        <td><input class="selection" type="checkbox" aqbe:path="/name/value"><span>Patient Name</span></td>
+        <td><input class="selection" type="checkbox" aqbe:path="ehr./name/value"><span>Patient Name</span></td>
         <td>
           <select class="condition">
             <option value="0">=</option>
             <option value="1">!=</option>
           </select>
-          <input type="text" value="" placeholder="Please Input" aqbe:type="Require" aqbe:path="/name/value" />
+          <input type="text" value="" placeholder="Please Input" aqbe:type="Require" aqbe:path="ehr./name/value" />
           <input class="submit" type="button" value="add">
         </td>
       </tr>
       <tr>
-        <td><input class="selection" type="checkbox" aqbe:path="/composer/value"><span>Composer</span></td>
+        <td><input class="selection" type="checkbox" aqbe:path="ehr./composer/value"><span>Composer</span></td>
         <td>
           <select class="condition">
             <option value="0">=</option>
             <option value="1">!=</option>
           </select>
-          <input type="text" value="" placeholder="Please Input" aqbe:type="" aqbe:path="/composer/value" />
+          <input type="text" value="" placeholder="Please Input" aqbe:type="" aqbe:path="ehr./composer/value" />
           <input class="submit" type="button" value="add">
         </td>
       </tr>
       <tr>
-        <td><input class="selection" type="checkbox" aqbe:path="/context/start_time"><span>Context</span></td>
+        <td><input class="selection" type="checkbox" aqbe:path="ehr./context/start_time"><span>Context</span></td>
         <td>
           <select class="condition">
             <option value="0">=</option>
@@ -57,17 +57,57 @@
             <option value="4">&gt;=</option>
             <option value="5">&lt;=</option>
           </select>
-          <input type="text" value="" aqbe:type="DV_DATE_TIME" aqbe:path="/context/start_time" id="context" />
+          <input type="text" value="" aqbe:type="DV_DATE_TIME" aqbe:path="ehr./context/start_time" id="context" />
           <input type="hidden" value="" aqbe:path="/context/start_time" aqbe:type="DvDateTimeInteger" />
           <input class="submit" type="button" value="add">
         </td>
       </tr>
-      </table>
+      <tr>
+    </table>
+
+    <h3>Advanced Query</h3>
+    <table class="adl">
+      <tr>
+        <td>exists</td>
+        <td>
+          <select id="exists" aqbe:path="$exists" aqbe:type="DV_CODED_TEXT">
+            <option value="">Please Select</option>
+          </select>
+          <input class="submit" type="button" value="add">
+        </td>
+      </tr>
+      <tr>
+        <td>rename</td>
+        <td>
+          <select id="rename">
+            <option value="">Please Select</option>
+          </select>
+          <input type="text" value="" disabled="disabled" />
+          <input type="button" value="add" />
+        </td>
+      </tr>
+      <!--
+      <tr>
+        <td>devide (not implemented)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>in (not implemented)</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>not in (not implemented)</td>
+        <td></td>
+      </tr>
+    -->
+    </table>
+
     </div>
     <div id="add"><input type="button" value="find data" /></div>
     <div id="result" style="display:none"></div>
     <div style="display:none"><textarea id="pathList"></textarea></div>
     <div style="display:none"><textarea id="stack"></textarea></div>
+    <div style="display:none"><textarea id="renameList"></textarea></div>
   </body>
 </html>
 

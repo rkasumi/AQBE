@@ -21,7 +21,7 @@ conceptSelector = ->
     dataType: "json"
     success: (json) ->
       arr = Array.prototype.slice.apply(json.adl)
-      adlList = Array.sort(arr)
+      adlList = arr.sort()
       for value in adlList
         $("#concept").append($("<option>").val(value).text(value))
       # ADLファイルが選択された時の操作

@@ -223,15 +223,18 @@ submit = (obj) ->
       if $(i).attr("class") is "condition"
         condition = $(i).val()
       else
-        path = $(i).attr("aqbe:path")
+        parent = $(i).parents(".adl").attr("aqbe_adl_name")
+        path = unless path? then parent + "." + $(i).attr("aqbe:path") else path
         type = $(i).attr("aqbe:type")
         if type is "DvQuantityUnit"
           unit = $(i).val()
           unitStr = $(i).children(":selected").text()
+          pathUnit = parent + "." + $(i).attr("aqbe:path")
         else if type is "DV_DATE_TIME"
           calStr = $(i).val()
         else
           value = $(i).val()
+        $(i).val("")
 
   # empty value
   if value is ""
@@ -242,7 +245,7 @@ submit = (obj) ->
   conStr = con2str(condition)
 
   # make string
-  str = "#{name},#{path},#{condition},#{conStr},#{value},#{unit},#{unitStr},#{calStr}"
+  str = "#{name},#{path},#{condition},#{conStr},#{value},#{unit},#{unitStr},#{pathUnit},#{calStr}"
 
   # display
   remover = $("<input>").attr("type","button").attr("class", "remover").val("x")
@@ -252,7 +255,9 @@ submit = (obj) ->
     $("#stack").empty()
     flag = true
     for x in text.split("\n")
-      unless (x is str and flag) or x is ""
+      if x is str and flag
+        flag = false
+      else
         $("#stack").append("#{x}\n")
 
   $(obj).parent("td").append($("<p>").text("#{conStr} #{(if calStr? then calStr else value)} #{(if unitStr? then unitStr else empty)}").append(remover))

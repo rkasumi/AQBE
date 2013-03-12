@@ -1,22 +1,28 @@
 validate = ->
+  $("input").each( ->
+    addValidate(@)
+  )
   #id以外の属性で動作しない
+  $("#context").AnyTime_noPicker()
+  $("#context").AnyTime_picker({
+    format: "%Y/%m/%d %H:%i:%s"
+    earliest: "1980/01/01 01:00:00"
+    latest: new Date()
+  })
   $("#fieldDate").AnyTime_picker({
     format: "%Y/%m/%d %H:%i:%s"
     earliest: "1980/01/01 01:00:00"
     latest: new Date()
   })
-  $("input").each( ->
-    addValidate(@)
-  )
 
 addValidate = (obj) ->
   type = $(obj).attr("aqbe:type")
   if type is "DvQuantity"
-    $(obj).change -> validateDvQuantity(obj)
+    $(obj).unbind().change -> validateDvQuantity(obj)
   else if type is "DV_COUNT"
-    $(obj).change -> validateDvCount(obj)
+    $(obj).unbind().change -> validateDvCount(obj)
   else if type is "DV_DATE_TIME"
-    $(obj).change -> validateDvDateTime(obj)
+    $(obj).unbind().change -> validateDvDateTime(obj)
 
 errorWindow = (obj, text) ->
   span = $(obj).next("span")

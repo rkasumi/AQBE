@@ -1,3 +1,59 @@
+body {
+  padding-top: 60px;
+  padding-bottom: 20px;
+  background: #fdfffe
+}
+
+h3 {
+  font-size: 20px;
+  padding-top: 10px;
+}
+
+h3 .selection, td .selection {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+  margin-bottom: 0;
+  margin-right: 4px;
+}
+
+select {
+  width: auto;
+}
+
+.condition {
+  width: 60px;
+}
+
+table {
+  background: #ffffff;
+}
+
+td p {
+  padding: 10px;
+font-size: 14px;
+}
+
+.adl {
+  border: 1px solid #999999;
+}
+
+.adl th {
+  font-size: 16px;
+}
+
+.btn-mini {
+  margin-left: 4px;
+  margin-bottom: 4px;
+}
+
+.space {
+  text-align: center;
+}
+
+/*
 .adl {
   width: 900px;
   border: 1px #E3E3E3 solid;
@@ -50,3 +106,4 @@ h3 {
   color: #ff0000;
   font-size: 9px;
 }
+*/

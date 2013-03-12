@@ -3,13 +3,9 @@ $(document).ready ->
   $("#add input").click ->
     sendConditionBox()
   $("#pathList").append("ehr./name/value,Patient Name\nehr./composer/value,Composer\nehr./context/start_time,Context\n")
-  $("#context").AnyTime_picker({
-    format: "%Y/%m/%d %H:%i:%s"
-    earliest: "1980/01/01 01:00:00"
-    latest: new Date()
-  })
   $(".submit").click ->
     submit(@)
+  validate()
   loadExists()
   loadRename()
 
@@ -58,7 +54,7 @@ parseConcept = (json) ->
   for name, list of adlList
     # 単ADL名の表示とテーブルの表示
     title = $("<h3>").append($("<input>").attr("type", "checkbox").attr("class", "selection").attr("aqbe:path", name)).append(name)
-    $("#find").append(title).append($("<table>").attr("class", "adl").attr("aqbe_adl_name", name))
+    $("#find").append(title).append($("<table>").attr("class", "adl table table-bordered").attr("aqbe_adl_name", name))
     # ADLList の展開
     for k,v of list
       # ADLList名の表示
@@ -74,7 +70,7 @@ sendConditionBox = ->
   text = $("#stack").text().split("\n")
   empty = ""
   $("#result").empty()
-  table = $("<table>").attr("class","adl")
+  table = $("<table>").attr("class","adl table table-bordered")
   table.append($("<tr>").append($("<th>").text("Object")).append($("<th>").text("Condition")))
   tbody = $("<tbody>").attr("id", "sortable")
   for t in text
@@ -90,23 +86,24 @@ sendConditionBox = ->
   $("#result").append(table.append(tbody)).append($("<br>"))
   $("#sortable").sortable()
 
-  find = $("<input>").attr("type", "button").val("find data")
-  find.click ->
-    findData()
-  $("#result").append($("<div>").attr("id", "add").append(find))
-
   # 検索フォームを隠し、結果を表示
   $("#find").hide()
-  $("#add").hide()
+  $("#concept_box").hide()
   $("#result").show("fast")
+
+  $("#add input").unbind().click ->
+    findData()
 
   # 戻るボタンを表示
   $("#back").show()
   $("#back input").unbind() # 古いイベントを削除
   $("#back input").click ->
+    $("#add input").unbind().click ->
+      sendConditionBox()
+    $("#add").show()
     $("#result").hide()
     $("#find").show("fast")
-    $("#add").show()
+    $("#concept_box").show()
     $("#back").hide() # ボタンを非表示に
     $("#result").empty() # 結果を削除
 
@@ -215,10 +212,11 @@ findData = ->
     contentType: "text/json"
     data: JSON.stringify(request)
     success: (response) ->
-      $("#result").append("Result => #{response.result.length} patients")
+      $("#result").hide()
+      $("#result").append($("<p>").text("Result => #{response.result.length} patients"))
       # 成功したら結果をテーブルに表示
       for result in response.result
-        table = $("<table>").attr("class","adl")
+        table = $("<table>").attr("class","adl table table-bordered")
         for key, obj of result
           if key isnt "ehr"
             table.append($("<tr>").append($("<th>").attr("colspan",2).append(key)))
@@ -231,6 +229,8 @@ findData = ->
               console.log rename(b_name)
               table.append($("<tr>").append($("<td>").append(rename(b_name))).append($("<td>").append(value)))
         $("#result").append(table).append($("<br>"))
+      $("#result").show("fast")
+      $("#add").hide()
 
     error: ->
       alert "Bad Request"
@@ -273,7 +273,7 @@ loadRename = ->
       str = "#{$("#rename").val()},#{value}"
       $("#renameList").append("#{str}\n")
       # display
-      remover = $("<input>").attr("type","button").attr("class", "remover").val("x")
+      remover = $("<input>").attr("type","button").attr("class", "remover btn btn-mini").val("x")
       remover.click ->
         remover.parent("p").remove()
         text = $("#renameList").text()

@@ -2,14 +2,7 @@ $(document).ready ->
   conceptSelector()
   $("#add input").click ->
     addData()
-  $("#context").AnyTime_picker({
-    format: "%Y/%m/%d %H:%i:%s"
-    earliest: "1980/01/01 01:00:00"
-    latest: new Date()
-  })
-  $("#context").change( ->
-    validateDvDateTime(@)
-  )
+  validate()
 
 ###
   * #concept要素にADL名一覧を展開
@@ -53,7 +46,7 @@ parseConcept = (json) ->
   # ADL Listの展開
   for name, list of adlList
     # 単ADL名の表示とテーブルの表示
-    $("#insert").append("<h3>#{name}</h3>").append($("<table>").attr("class", "adl").attr("aqbe_adl_name", name))
+    $("#insert").append("<h3>#{name}</h3>").append($("<table>").attr("class", "adl table table-bordered").attr("aqbe_adl_name", name))
     # ADLList の展開
     for k,v of list
       # ADLList名の表示

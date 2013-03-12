@@ -64,7 +64,7 @@ class Concept
     selecter
 
   submitBuilder: () ->
-    submitter = $("<input>").attr("type", "button").attr("class", "submit").val("add")
+    submitter = $("<input>").attr("type", "button").attr("class", "submit btn").val("add")
     submitter.click ->
       submit(submitter)
     submitter
@@ -79,7 +79,7 @@ class DvQuantity extends Concept
     @path = @path + "/magnitude"
     @unitPath = @path.replace("/magnitude", "/units")
     @min  = if json.min[0]? then json.min else [-999999]
-    @max  = if json.max? then json.max else [999999]
+    @max  = if json.max[0]? then json.max else [999999]
     @unit = json.unit
   getHtml: ->
     input = @inputBuilder("0.0").attr("aqbe:min", @min[0]).attr("aqbe:max", @max[0])
@@ -152,7 +152,7 @@ class DvInterval extends Concept
     super json, name
     @interval = json.interval
   getHtml: ->
-    newTable = $("<table>").attr("class", "adl")
+    newTable = $("<table>").attr("class", "adl2 table table-bordered")
     for c in @interval
       cc = conceptBuilder(c, @adlName)
       newTable.append(cc.getHtml())
@@ -191,7 +191,7 @@ class DvCluster extends Concept
     super json, name
     @cluster = json.cluster
   getHtml: ->
-    newTable = $("<table>").attr("class", "adl2")
+    newTable = $("<table>").attr("class", "adl2 table table-bordered")
     for c in @cluster
       cc = conceptBuilder(c, @adlName)
       newTable.append(cc.getHtml())
@@ -202,11 +202,11 @@ class DvMultipleElements extends Concept
     super json, name
     @elements = json.elements
   getHtml: ->
-    newTable = $("<table>").attr("class", "adl2")
+    newTable = $("<table>").attr("class", "adl2 table table-bordered")
     for c in @elements
       cc = conceptBuilder(c._2, @adlName)
+      super.append($("<td>").append(newTable))
       newTable.append(cc.getHtml())
-    super.append($("<td>").append(newTable))
 
 
 submit = (obj) ->
@@ -220,7 +220,7 @@ submit = (obj) ->
   name = parent.prev("td").find("span").text() # nameの取得
   empty = ""
   for i in input
-    unless $(i).attr("class") is "submit" or $(i).attr("class") is "remover"
+    unless $(i).attr("class") is "submit btn" or $(i).attr("class") is "remover btn btn-mini"
       if $(i).attr("class") is "condition"
         condition = $(i).val()
       else
@@ -252,7 +252,7 @@ submit = (obj) ->
   str = "#{name},#{path},#{condition},#{conStr},#{value},#{unit},#{unitStr},#{pathUnit},#{calStr}"
 
   # display
-  remover = $("<input>").attr("type","button").attr("class", "remover").val("x")
+  remover = $("<input>").attr("type","button").attr("class", "remover btn btn-mini").val("x")
   remover.click ->
     remover.parent("p").remove()
     text = $("#stack").text()

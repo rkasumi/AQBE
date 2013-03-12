@@ -2,28 +2,46 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>AQBE</title>
+  <title>AQBE Data Finder</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link rel="stylesheet" type="text/css" href="css/anytime.css" />
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/blitzer/jquery-ui.css" rel="stylesheet" type="text/css" />
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
   <script src="lib/anytime.js"></script>
+  <script src="lib/bootstrap.min.js"></script>
   <script src="js/validate.js"></script>
   <script src="js/concept_find.js"></script>
   <script src="js/find.js"></script>
 </head>
 <body>
-  <input type="button" value="new query" onclick="document.location = document.location" />
-  <span style="display:none" id="back"><input type="button" value="back" /></span>
-  <select id="concept">
-    <option value="" selected>Please Select</option>
-  </select>
+  <div class="container">
+
+  <!-- Header -->
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+      <a class="brand" href="index.html">AQBE</a>
+      <ul class="nav">
+        <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe/find.html">Data Finder</a></li>
+        <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe/insert.html">Data Inserter</a></li>
+        <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe2011/">AQL Generator 2011</a></li>
+      </ul>
+    </div>
+    </div>
+  </div>
+
+  <div id="concept_box">
+    <select id="concept">
+      <option value="" selected>Please Select</option>
+    </select>
+  </div>
   <div id="find">
     <h3><input class="selection" type="checkbox" aqbe:path="ehr" />Patient Data</h3>
-    <table class="adl" aqbe_adl_name="ehr">
+    <table class="adl table table-bordered" aqbe_adl_name="ehr">
       <tr>
         <td><input class="selection" type="checkbox" aqbe:path="ehr./name/value"><span>Patient Name</span></td>
         <td>
@@ -32,7 +50,7 @@
             <option value="1">!=</option>
           </select>
           <input type="text" value="" placeholder="Please Input" aqbe:type="Require" aqbe:path="ehr./name/value" />
-          <input class="submit" type="button" value="add">
+          <input class="submit btn" type="button" value="add">
         </td>
       </tr>
       <tr>
@@ -43,7 +61,7 @@
             <option value="1">!=</option>
           </select>
           <input type="text" value="" placeholder="Please Input" aqbe:type="" aqbe:path="ehr./composer/value" />
-          <input class="submit" type="button" value="add">
+          <input class="submit btn" type="button" value="add">
         </td>
       </tr>
       <tr>
@@ -59,21 +77,21 @@
           </select>
           <input type="text" value="" aqbe:type="DV_DATE_TIME" aqbe:path="ehr./context/start_time" id="context" />
           <input type="hidden" value="" aqbe:path="/context/start_time" aqbe:type="DvDateTimeInteger" />
-          <input class="submit" type="button" value="add">
+          <input class="submit btn" type="button" value="add">
         </td>
       </tr>
       <tr>
     </table>
 
     <h3>Advanced Query</h3>
-    <table class="adl">
+    <table class="adl table table-bordered">
       <tr>
         <td>exists</td>
         <td>
           <select id="exists" aqbe:path="$exists" aqbe:type="DV_CODED_TEXT">
             <option value="">Please Select</option>
           </select>
-          <input class="submit" type="button" value="add">
+          <input class="submit btn" type="button" value="add">
         </td>
       </tr>
       <tr>
@@ -83,7 +101,7 @@
             <option value="">Please Select</option>
           </select>
           <input type="text" value="" disabled="disabled" />
-          <input type="button" value="add" />
+          <input type="button" class="btn" value="add" />
         </td>
       </tr>
       <!--
@@ -103,11 +121,16 @@
     </table>
 
     </div>
-    <div id="add"><input type="button" value="find data" /></div>
     <div id="result" style="display:none"></div>
+    <div class="space">
+      <span id="add"><input type="button" value="find data" class="btn btn-primary" /></span>
+      <span style="display: none;" id="back"><input type="button" class="btn" value="back" /></span>
+    </div>
     <div style="display:none"><textarea id="pathList"></textarea></div>
     <div style="display:none"><textarea id="stack"></textarea></div>
     <div style="display:none"><textarea id="renameList"></textarea></div>
+
+  </div>
   </body>
 </html>
 

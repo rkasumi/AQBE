@@ -2,42 +2,66 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>AQBE Data Inserter</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width">
-  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
   <link rel="stylesheet" type="text/css" href="css/anytime.css" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/blitzer/jquery-ui.css" rel="stylesheet" type="text/css" />
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+  <script src="lib/bootstrap.min.js"></script>
   <script src="lib/anytime.js"></script>
   <script src="js/validate.js"></script>
   <script src="js/concept.js"></script>
   <script src="js/insert.js"></script>
 </head>
 <body>
-  <input type="button" value="new query" onclick="document.location = document.location" />
-  <select id="concept">
-    <option value="" selected>Please Select</option>
-  </select>
-  <div id="insert">
-    <h3>Patient Data</h3>
-    <table class="adl" aqbe_adl_name="ehr">
-      <tr>
-        <td>Patient Name*</td>
-        <td><input type="text" value="" placeholder="Please Input" aqbe:type="Require" aqbe:path="/name/value" /></td>
-      </tr>
-      <tr>
-        <td>Composer</td>
-        <td><input type="text" value="" placeholder="Please Input" aqbe:type="" aqbe:path="/composer/value" /></td>
-      </tr>
-      <tr>
-        <td>Context</td>
-        <td><input type="text" value="" aqbe:type="DV_DATE_TIME" aqbe:path="/context/start_time" id="context" />
-          <input type="hidden" value="" aqbe:path="/context/start_time" aqbe:type="DvDateTimeInteger" /></td>
-      </tr>
-      </table>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="index.html">AQBE</a>
+          <ul class="nav">
+            <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe/find.html">Data Finder</a></li>
+            <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe/insert.html">Data Inserter</a></li>
+            <li><a href="http://wako3.u-aizu.ac.jp:8080/aqbe2011/">AQL Generator 2011</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <div id="add"><input type="button" value="add data" /></div>
-    <div id="result"></div>
+
+    <select id="concept">
+      <option value="" selected>Please Select</option>
+    </select>
+    <div id="insert">
+      <h3>Patient Data</h3>
+      <table class="adl table table-bordered" aqbe_adl_name="ehr">
+        <tr>
+          <td>Patient Name*</td>
+          <td><input type="text" value="" placeholder="Please Input" aqbe:type="Require" aqbe:path="/name/value" /></td>
+        </tr>
+        <tr>
+          <td>Composer</td>
+          <td><input type="text" value="" placeholder="Please Input" aqbe:type="" aqbe:path="/composer/value" /></td>
+        </tr>
+        <tr>
+          <td>Context</td>
+          <td><input type="text" value="" aqbe:type="DV_DATE_TIME" aqbe:path="/context/start_time" id="context" />
+            <input type="hidden" value="" aqbe:path="/context/start_time" aqbe:type="DvDateTimeInteger" /></td>
+          </tr>
+        </table>
+      </div>
+      <div class="space">
+        <span id="add"><input type="button" value="insert data" class="btn btn-primary" /></span>
+        <span style="display: none;" id="back"><input type="button" class="btn" value="back" /></span>
+      </div>
+      <div id="result"></div>
+
+    </div>
   </body>
-</html>
+  </html>
 
